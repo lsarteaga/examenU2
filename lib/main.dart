@@ -81,7 +81,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       _getFieldSurname(),
                       _getFieldCard(),
                       _getFieldDate(),
-                      _getFieldDiscapacity(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text('Seleccione si posee discapacidad:',
+                              style: TextStyle(
+                                fontSize: 18,
+                              )),
+                          _getFieldDiscapacity(),
+                        ],
+                      ),
                       _getSubmitButton()
                     ]))),
             Text('Personas registradas',
@@ -175,31 +184,44 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _getFieldDiscapacity() {
-    return Switch(
-      value: isSwitched,
-      onChanged: (value) {
-        setState(() {
-          isSwitched = value;
-          if (isSwitched) {
-            _person.discapacity = 'Si';
-          } else {
-            _person.discapacity = 'No';
-          }
-        });
-      },
-      activeColor: Colors.green,
-      activeTrackColor: Colors.lightGreenAccent,
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: Switch(
+        value: isSwitched,
+        onChanged: (value) {
+          setState(() {
+            isSwitched = value;
+            if (isSwitched) {
+              _person.discapacity = 'Si';
+            } else {
+              _person.discapacity = 'No';
+            }
+          });
+        },
+        activeColor: Theme.of(context).primaryColor,
+        activeTrackColor: Theme.of(context).primaryColorLight,
+      ),
     );
   }
 
   Widget _getSubmitButton() {
     return Container(
-        color: Theme.of(context).buttonColor,
-        margin: EdgeInsets.symmetric(vertical: 20.0),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor,
+          border: Border.all(
+            width: 3,
+            color: Theme.of(context).primaryColor,
+          ),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        width: MediaQuery.of(context).size.width * 0.2,
+        //color: Theme.of(context).primaryColor,
+        margin: EdgeInsets.symmetric(vertical: 10.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
+                tooltip: 'Guardar Registro',
                 icon: Icon(Icons.send),
                 onPressed: () async {
                   if (!formKey.currentState.validate()) return;
@@ -235,21 +257,24 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _listView(List<PersonModel> persons) {
     return ListView.builder(
+        padding: const EdgeInsets.only(top: 10, bottom: 10),
         shrinkWrap: true,
         itemCount: persons.length,
-        itemBuilder: (_, index) => ListTile(
+        itemBuilder: (_, index) => Card(
+            elevation: 6,
+            child: ListTile(
               leading: Icon(Icons.person),
               title: Text('Nombre: ' +
-                  persons[index].name +
+                  persons[index].name.toUpperCase() +
                   ' ' +
-                  persons[index].surname +
+                  persons[index].surname.toUpperCase() +
                   '\nCedula: ' +
                   persons[index].cardId),
-              subtitle: Text('Nacimiento: ' +
+              subtitle: Text('Fecha de nacimiento: ' +
                   persons[index].birthDate +
                   "\nDiscapacidad: " +
                   persons[index].discapacity),
-            ));
+            )));
   }
 
   void showInSnackBar(String value) {
