@@ -161,7 +161,12 @@ class _MyHomePageState extends State<MyHomePage> {
             initialDate: DateTime.now(),
             firstDate: DateTime(1950),
             lastDate: DateTime(2100));
-        dateController.text = date.toString().substring(0, 10);
+        if (date != null) {
+          dateController.text = date.toString().substring(0, 10);
+        } else {
+          dateController.text = '';
+        }
+
         if (dateController.text.isNotEmpty) {
           _person.birthDate = dateController.text;
         }
@@ -237,10 +242,12 @@ class _MyHomePageState extends State<MyHomePage> {
               title: Text('Nombre: ' +
                   persons[index].name +
                   ' ' +
-                  persons[index].surname),
+                  persons[index].surname +
+                  '\nCedula: ' +
+                  persons[index].cardId),
               subtitle: Text('Nacimiento: ' +
                   persons[index].birthDate +
-                  " Discapacidad: " +
+                  "\nDiscapacidad: " +
                   persons[index].discapacity),
             ));
   }
