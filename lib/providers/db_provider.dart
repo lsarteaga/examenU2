@@ -18,7 +18,7 @@ class DBProvider {
 
   Future<Database> initDb() async {
     Directory appDir = await getApplicationDocumentsDirectory();
-    final path = join(appDir.path, 'datos.db');
+    final path = join(appDir.path, 'personas.db');
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {
       await db.execute('''
