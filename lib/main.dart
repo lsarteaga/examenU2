@@ -3,9 +3,8 @@ import 'package:examenu2/providers/vulnerability_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-Future<void> main() {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider<VulnerabilityProvider>(
         create: (_) => VulnerabilityProvider())
@@ -16,9 +15,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ContentProvider>(
-        create: (BuildContext context) => ContentProvider(),
-        child: Consumer<ContentProvider>(builder: (context, provider, __) {
+    return ChangeNotifierProvider<VulnerabilityProvider>(
+        create: (BuildContext context) => VulnerabilityProvider(),
+        child:
+            Consumer<VulnerabilityProvider>(builder: (context, provider, __) {
           return MaterialApp(
             title: 'Flutter Demo',
             theme: ThemeData(
@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
+  MyHomePage({Key key}) : super(key: key);
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -41,6 +42,13 @@ class _MyHomePageState extends State<MyHomePage> {
   PersonModel _person = new PersonModel();
   final formKey = GlobalKey<FormState>();
   bool isSwitched = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -51,26 +59,40 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final vulnerabilityProvider =
+        Provider.of<VulnerabilityProvider>(context, listen: false);
+    vulnerabilityProvider.loadPersons();
     return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: Text('Examen Unidad 2'),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
-        child: Column<Widget>[
-          Text('Registro',),
-          Container(
-                        margin: EdgeInsets.all(14.0),
-                        child: Form(
-                            key: formKey,
-                            child: Column(children: [
-                              _getFieldCard(),
-                              _getFieldSurname(),
-                              _getFieldCard(),
-                              _getFieldDate(),
-                              _getFieldDiscapacity(),
-                              _getSubmitButton()
-                            ]))),
-        ],
+        child: Column(
+          children: <Widget>[
+            Text('Registro', style: Theme.of(context).textTheme.headline4),
+            Container(
+                margin: EdgeInsets.all(14.0),
+                child: Form(
+                    key: formKey,
+                    child: Column(children: [
+                      _getFieldName(),
+                      _getFieldSurname(),
+                      _getFieldCard(),
+                      _getFieldDate(),
+                      _getFieldDiscapacity(),
+                      _getSubmitButton()
+                    ]))),
+            Text('Personas registradas',
+                style: Theme.of(context).textTheme.headline4),
+            _listView(vulnerabilityProvider.persons),
+          ],
+        ),
       ),
     );
   }
+
   Widget _getFieldName() {
     return TextFormField(
       initialValue: "",
@@ -89,7 +111,8 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
   }
-   Widget _getFieldSurname() {
+
+  Widget _getFieldSurname() {
     return TextFormField(
       initialValue: "",
       decoration: InputDecoration(labelText: "Apellido"),
@@ -107,7 +130,8 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
   }
-   Widget _getFieldCard() {
+
+  Widget _getFieldCard() {
     return TextFormField(
       initialValue: "",
       decoration: InputDecoration(labelText: "Cedula"),
@@ -125,6 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
   }
+
   Widget _getFieldDate() {
     return TextField(
       readOnly: true,
@@ -132,35 +157,36 @@ class _MyHomePageState extends State<MyHomePage> {
       decoration: InputDecoration(hintText: "Escoja su fecha de nacimiento"),
       onTap: () async {
         var date = await showDatePicker(
-          context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime(1950),
-          lastDate: DateTime(2021)
-        );
-        dateController.text = date.toString().substring(0,10);
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(1950),
+            lastDate: DateTime(2100));
+        dateController.text = date.toString().substring(0, 10);
         if (dateController.text.isNotEmpty) {
           _person.birthDate = dateController.text;
         }
       },
     );
   }
+
   Widget _getFieldDiscapacity() {
     return Switch(
       value: isSwitched,
       onChanged: (value) {
         setState(() {
-                  isSwitched = value;
-                  if (isSwitched) {
-                    _person.discapacity = 'Si';
-                  } else {
-                    _person.discapacity = 'No';
-                  }
-                });
+          isSwitched = value;
+          if (isSwitched) {
+            _person.discapacity = 'Si';
+          } else {
+            _person.discapacity = 'No';
+          }
+        });
       },
       activeColor: Colors.green,
       activeTrackColor: Colors.lightGreenAccent,
     );
   }
+
   Widget _getSubmitButton() {
     return Container(
         color: Theme.of(context).buttonColor,
@@ -178,17 +204,51 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   //Llamamos al provider para guardar el viaje
                   final vulnerabilityProvider =
-                      Provider.of<VulnerabilityProvider>(context, listen: false);
+                      Provider.of<VulnerabilityProvider>(context,
+                          listen: false);
+                  if (isSwitched == false) {
+                    _person.discapacity = 'No';
+                  }
                   _person = await vulnerabilityProvider.addPerson(
-                    _person.cardId, 
-                    _person.name, _person.surname, 
-                    _person.birthDate, _person.discapacity
-                  );
-                  print(_person);
+                      _person.cardId,
+                      _person.name,
+                      _person.surname,
+                      _person.birthDate,
+                      _person.discapacity);
+                  if (_person != null) {
+                    print(_person);
+                    formKey.currentState.reset();
+                    isSwitched = false;
+                    dateController.text = '';
+                    showInSnackBar('Registro Exitoso');
+                    setState(() {});
+                  }
                 })
           ],
         ));
   }
-}
 
- 
+  _listView(List<PersonModel> persons) {
+    return ListView.builder(
+        shrinkWrap: true,
+        itemCount: persons.length,
+        itemBuilder: (_, index) => ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Nombre: ' +
+                  persons[index].name +
+                  ' ' +
+                  persons[index].surname),
+              subtitle: Text('Nacimiento: ' +
+                  persons[index].birthDate +
+                  " Discapacidad: " +
+                  persons[index].discapacity),
+            ));
+  }
+
+  void showInSnackBar(String value) {
+    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+      content: new Text(value),
+      duration: Duration(milliseconds: 600),
+    ));
+  }
+}

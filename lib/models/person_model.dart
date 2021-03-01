@@ -16,8 +16,8 @@ class PersonModel {
     this.discapacity,
   });
 
-  DateTime time;
-  String id;
+  String time;
+  int id;
   String cardId;
   String name;
   String surname;
@@ -26,7 +26,7 @@ class PersonModel {
 
   factory PersonModel.fromJson(Map<String, dynamic> json) => PersonModel(
         time: json["time"],
-        id: json["_id"],
+        id: json["id"],
         cardId: json["cardId"],
         name: json["name"],
         surname: json["surname"],
@@ -36,7 +36,7 @@ class PersonModel {
 
   Map<String, dynamic> toJson() => {
         "time": time,
-        "_id": id,
+        "id": id,
         "cardId": cardId,
         "name": name,
         "surname": surname,

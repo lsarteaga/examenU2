@@ -18,7 +18,7 @@ class DBProvider {
 
   Future<Database> initDb() async {
     Directory appDir = await getApplicationDocumentsDirectory();
-    final path = join(appDir.path, 'ExamenU2.db');
+    final path = join(appDir.path, 'data2.db');
     return await openDatabase(path, version: 1, onOpen: (db) {},
         onCreate: (Database db, int version) async {
       await db.execute('''
@@ -28,7 +28,7 @@ class DBProvider {
           cardId TEXT,
           name TEXT,
           surname TEXT,
-          birth TEXT,
+          birthDate TEXT,
           discapacity TEXT
         )      
       ''');
